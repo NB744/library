@@ -1,0 +1,17 @@
+#library-book-collection-wrapper{
+    display: grid;
+    border: solid grey 1px;
+    border-radius: 5px;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+#add-book-form-wrapper{
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.book-wrapper{
+    border: solid black 1px;
+    padding: 20px;
+}
