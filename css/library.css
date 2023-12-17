@@ -54,3 +54,20 @@
     display: flex;
     justify-content: space-evenly;
 }
+
+.delete-book-btn{
+    display: flex;
+    margin: 10px;
+}
+
+body{
+    background-color: antiquewhite;
+}
+
+.read-book{
+    background-color:#81c5a9;
+}
+
+.not-read-book{
+    background-color: #ffb3a5;
+}

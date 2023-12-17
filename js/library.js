@@ -12,50 +12,62 @@ window.onload = function(){
         this.author = author;
         this.pageCount = pageCount;
         this.read = read;
-        this.readMarkup = "Not read yet!";
-        if(this.read){
-            this.readMarkup = "Read already!";
-        }
+        this.readMarkup = getBookReadMarkup(this);
     }
 
     function addBookToLibrary(book){
         myLibrary.push(book);
     }
 
-
-    firfire = new Book("Firfire", "Buddhisagar", 554, true);
-    ular = new Book("Ular", "Nayan Raj Pandey", 80, true);
-    sumnima = new Book("Sumnima", "BP Koirala", 205, false);
-
-    //addBookToLibrary(firfire);
-    //addBookToLibrary(ular);
-    //addBookToLibrary(sumnima);
-
     refreshBooks();
-
-    console.log(myLibrary);
-
     
 
     function refreshBooks(){
         if(myLibrary.length === 0){
-            console.log("HERE");
             document.getElementById("library-book-collection-wrapper").innerHTML = "<div id = 'no-books-found-wrapper'>No Books found in your collection!</div>";
         }else{
             let bookCount = 0;
             //Reset the book collection wrapper div.
             document.getElementById("library-book-collection-wrapper").innerHTML="";
             myLibrary.forEach(book => {
-                //console.table(book);
                 //Add each book to our wrapper as a new div container.
                 let eachBookDiv = document.createElement("div");
                 let eachBookTitleElem = document.createElement("h2");
                 eachBookTitleElem.innerHTML = `${getBookTitle(book)} <hr />`;
                 eachBookDiv.classList.add("book-wrapper");
+                //See if this book is marked as read.
+                if(book.read){
+                    eachBookDiv.classList.add("read-book");
+                }else{
+                    eachBookDiv.classList.add("not-read-book");
+                }
                 eachBookDiv.setAttribute("id", `book-${bookCount}`);
                 //Prepare the markup for the book.
-                eachBookDiv.innerHTML = `${getBookMarkup(book)}`;
+                eachBookDiv.innerHTML = `${getBookMarkup(book)}<br />`;
                 eachBookDiv.prepend(eachBookTitleElem);
+
+                // Also, create a button to delete this entry.
+                let deleteBookBtnElem = document.createElement("input");
+                deleteBookBtnElem.setAttribute("type", "button");
+                deleteBookBtnElem.setAttribute("value", "Delete this book!");
+                deleteBookBtnElem.classList.add("delete-book-btn");
+                deleteBookBtnElem.setAttribute("data-id", `${bookCount}`);
+                //Append the delete book button to the eachBookDiv markup.
+                eachBookDiv.appendChild(deleteBookBtnElem);
+
+                //Also, create a button to mark the book as read/unread.
+                let markReadUnreadBtnElem = document.createElement("input");
+                markReadUnreadBtnElem.setAttribute("type", "button");
+                if(book.read){
+                    markReadUnreadBtnElem.setAttribute("value", "Mark book as Not Read");
+                }else{
+                    markReadUnreadBtnElem.setAttribute("value", "Mark book as Read");
+                }
+                markReadUnreadBtnElem.classList.add("mark-read-unread-btn");
+                markReadUnreadBtnElem.setAttribute("data-id", `${bookCount}`);
+                //Append the mark as read/unread button to the eachBookDiv Markup.
+                eachBookDiv.appendChild(markReadUnreadBtnElem);
+
                 //Append this element to our collection container.
                 document.getElementById("library-book-collection-wrapper").appendChild(eachBookDiv);
                 bookCount++;
@@ -63,15 +75,62 @@ window.onload = function(){
 
         }
         showAddBookBtn();
+        addDeleteBookEventListener();
+        markReadUnreadEventListener();
     }
     
+    function addDeleteBookEventListener(){
+        let allBookDeleteBtns = document.getElementsByClassName("delete-book-btn");
+        for(let i = 0; i<allBookDeleteBtns.length; i++){
+            allBookDeleteBtns[i].addEventListener("click", function(e){
+                //Get the data-id of the button clicked.
+                // The data-id is the index of our array which we need to remove.
+                toRemoveBookIndex = e.target.getAttribute("data-id");
+                removeBookFromLibrary(toRemoveBookIndex);
+                refreshBooks();
+            });
+        }
+    }
 
+    function markReadUnreadEventListener(){
+        let allBookMarkReadUnreadBtns = document.getElementsByClassName("mark-read-unread-btn");
+        for(let j = 0; j<allBookMarkReadUnreadBtns.length; j++){
+            allBookMarkReadUnreadBtns[j].addEventListener("click", function(e){
+                // Get the index of the book we are trying to mark.
+                toUpdateBookIndex = e.target.getAttribute("data-id");
+                //Get the book object from our array.
+                toUpdateBook = myLibrary[toUpdateBookIndex];
+                toggleBookReadStatus(toUpdateBook);
+                toUpdateBook.readMarkup = getBookReadMarkup(toUpdateBook);
+                refreshBooks();
+            });
+        }
+    }
+
+    function getBookReadMarkup(book){
+        if(book.read){
+            return "Read already!";
+        }else{
+            return "Not read yet!";
+        }
+    }
+
+    function toggleBookReadStatus(book){
+        if(book.read){
+            book.read = false;
+        }else{
+            book.read = true;
+        }
+    }
+
+    function removeBookFromLibrary(toRemoveIndex){
+        myLibrary.splice(toRemoveIndex, 1);
+    }
 
     function getBookTitle(book){
         return book.title;
     }
-
-
+    
     function getBookMarkup(book){
         return ("- Author: " + book.author + "<br /> - Pages:" + book.pageCount + "<br /> - " + book.readMarkup);
     }
@@ -102,7 +161,6 @@ window.onload = function(){
     document.getElementById("add-book-form").addEventListener("submit", function(e){
 
         //See which button was clicked.
-        console.log(e.target);
         e.preventDefault();
         //Get the form data from the element.
         let formBookTitle = document.getElementById("form_book_title").value;
@@ -128,7 +186,6 @@ window.onload = function(){
     
     document.getElementById("add_book_form_close_inp_btn").addEventListener("click", function(e){
         document.getElementById("add-book-form-dialog").close();
-
         //Show the Add Book Button.
         showAddBookBtn();
     });
